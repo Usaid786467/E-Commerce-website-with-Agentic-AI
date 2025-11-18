@@ -1,5 +1,6 @@
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import { CartDrawer } from '@/components/cart/CartDrawer'
 import { Providers } from '@/components/providers'
 
 export default function ShopLayout({
@@ -13,6 +14,7 @@ export default function ShopLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <CartDrawer />
       </div>
     </Providers>
   )
