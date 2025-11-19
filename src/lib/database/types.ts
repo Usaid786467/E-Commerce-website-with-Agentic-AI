@@ -6,7 +6,7 @@
  * (Prisma, Supabase, MongoDB, etc.)
  */
 
-export type DatabaseProvider = 'prisma' | 'supabase' | 'mock'
+export type DatabaseProvider = 'prisma' | 'supabase' | 'mock' | 'localstorage'
 
 export interface DatabaseConfig {
   provider: DatabaseProvider

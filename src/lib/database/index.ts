@@ -9,6 +9,7 @@ import type { IDatabase, DatabaseProvider } from './types'
 import { PrismaAdapter } from './prisma-adapter'
 import { SupabaseAdapter } from './supabase-adapter'
 import { MockAdapter } from './mock-adapter'
+import { LocalStorageAdapter } from './localstorage-adapter'
 
 // Export types
 export * from './types'
@@ -29,6 +30,9 @@ function createDatabase(provider?: DatabaseProvider): IDatabase {
   const dbProvider = provider || getDatabaseProvider()
 
   switch (dbProvider) {
+    case 'localstorage':
+      return new LocalStorageAdapter()
+
     case 'supabase':
       return new SupabaseAdapter()
 
