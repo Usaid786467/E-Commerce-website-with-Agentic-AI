@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sendShippingNotificationEmail } from '@/lib/email/email-service'
 
 async function checkAdminAccess(userId: string) {
   const user = await prisma.user.findUnique({
@@ -140,6 +141,21 @@ export async function PATCH(
         userAgent: request.headers.get('user-agent'),
       },
     })
+
+    // Send shipping notification email if status changed to shipped
+    if (body.status === 'shipped' && order.status !== 'shipped') {
+      const orderEmail = updatedOrder.guestEmail
+      if (orderEmail) {
+        sendShippingNotificationEmail(orderEmail, {
+          orderNumber: updatedOrder.orderNumber,
+          trackingNumber: updatedOrder.trackingNumber || undefined,
+          courierName: updatedOrder.courierName || undefined,
+          estimatedDelivery: updatedOrder.estimatedDelivery || undefined,
+        }).catch((error) => {
+          console.error('Failed to send shipping notification email:', error)
+        })
+      }
+    }
 
     return NextResponse.json(updatedOrder)
   } catch (error) {

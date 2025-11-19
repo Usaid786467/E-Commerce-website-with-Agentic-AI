@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { CreateOrderInput } from '@/types/order'
 import { generateOrderNumber } from '@/lib/utils'
 import { Decimal } from '@prisma/client/runtime/library'
+import { sendOrderConfirmationEmail } from '@/lib/email/email-service'
 
 export async function POST(request: NextRequest) {
   try {
@@ -235,6 +236,23 @@ export async function POST(request: NextRequest) {
 
       return newOrder
     })
+
+    // Send order confirmation email (non-blocking)
+    const orderEmail = order.guestEmail || session?.user?.email
+    if (orderEmail && order.shippingAddress[0]) {
+      sendOrderConfirmationEmail(orderEmail, {
+        orderNumber: order.orderNumber,
+        totalAmount: Number(order.totalAmount),
+        items: body.items.map((item) => ({
+          name: item.productId, // Will be replaced with actual product name in production
+          quantity: item.quantity,
+          price: item.price,
+        })),
+        shippingAddress: order.shippingAddress[0],
+      }).catch((error) => {
+        console.error('Failed to send order confirmation email:', error)
+      })
+    }
 
     return NextResponse.json(order, { status: 201 })
   } catch (error) {
