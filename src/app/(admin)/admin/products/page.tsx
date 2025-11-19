@@ -7,6 +7,7 @@ import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Input } from '@/components/ui/input'
+import { DeleteProductButton } from '@/components/admin/DeleteProductButton'
 
 async function getProducts(searchParams: any) {
   const page = parseInt(searchParams.page || '1')
@@ -86,9 +87,11 @@ export default async function ProductsManagementPage({
             Manage your product catalog ({total} products)
           </p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
+        <Button asChild>
+          <Link href="/admin/products/add">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Product
+          </Link>
         </Button>
       </div>
 
@@ -208,12 +211,15 @@ export default async function ProductsManagementPage({
                               <Eye className="h-4 w-4" />
                             </Link>
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/admin/products/${product.id}/edit`}>
+                              <Edit className="h-4 w-4" />
+                            </Link>
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
+                          <DeleteProductButton
+                            productId={product.id}
+                            productName={product.name}
+                          />
                         </div>
                       </td>
                     </tr>
