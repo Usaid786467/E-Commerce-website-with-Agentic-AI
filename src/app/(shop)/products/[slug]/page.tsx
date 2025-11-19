@@ -4,6 +4,8 @@ import { ProductImageGallery } from '@/components/product/ProductImageGallery'
 import { ProductInfo } from '@/components/product/ProductInfo'
 import { ProductTabs } from '@/components/product/ProductTabs'
 import { ProductGrid } from '@/components/product/ProductGrid'
+import { generateSEO, generateProductSchema, generateBreadcrumbSchema } from '@/lib/seo'
+import Script from 'next/script'
 
 interface ProductPageProps {
   params: {
@@ -20,15 +22,15 @@ export async function generateMetadata({ params }: ProductPageProps) {
     }
   }
 
-  return {
-    title: `${product.name} | ShopAI`,
-    description: product.shortDescription || product.description?.substring(0, 160),
-    openGraph: {
-      title: product.name,
-      description: product.shortDescription || '',
-      images: product.images?.[0]?.imageUrl ? [product.images[0].imageUrl] : [],
-    },
-  }
+  const firstImage = product.images?.[0]?.imageUrl
+
+  return generateSEO({
+    title: product.name,
+    description: product.shortDescription || product.description?.substring(0, 160) || `Buy ${product.name} at the best price. ${product.stockQuantity > 0 ? 'In stock' : 'Out of stock'}. Shop now!`,
+    image: firstImage,
+    url: `/products/${product.slug}`,
+    type: 'product',
+  })
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
@@ -43,6 +45,28 @@ export default async function ProductPage({ params }: ProductPageProps) {
     product.categoryId,
     4
   )
+
+  // Generate breadcrumb data
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'Products', url: '/products' },
+    { name: product.name, url: `/products/${product.slug}` },
+  ]
+
+  // Generate product schema data
+  const productSchemaData = generateProductSchema({
+    name: product.name,
+    description: product.description || product.shortDescription || '',
+    image: product.images?.[0]?.imageUrl,
+    price: Number(product.salePrice || product.price),
+    currency: 'PKR',
+    sku: product.sku,
+    brand: product.brand || undefined,
+    ratingValue: product.ratingAverage ? Number(product.ratingAverage) : undefined,
+    ratingCount: product.ratingCount || undefined,
+    availability: product.stockQuantity > 0 ? 'InStock' : 'OutOfStock',
+    condition: 'NewCondition',
+  })
 
   return (
     <div className="container-wide section-padding">
@@ -72,6 +96,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <ProductGrid products={relatedProducts as any} columns={4} />
         </div>
       )}
+
+      {/* Structured Data for SEO */}
+      <Script id="product-schema" type="application/ld+json">
+        {JSON.stringify(productSchemaData)}
+      </Script>
+      <Script id="breadcrumb-schema" type="application/ld+json">
+        {JSON.stringify(generateBreadcrumbSchema(breadcrumbs))}
+      </Script>
     </div>
   )
 }

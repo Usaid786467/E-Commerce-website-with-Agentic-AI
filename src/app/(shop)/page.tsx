@@ -3,6 +3,14 @@ import { ProductGrid } from '@/components/product/ProductGrid'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { generateSEO, generateOrganizationSchema, generateWebsiteSearchSchema } from '@/lib/seo'
+import Script from 'next/script'
+
+export const metadata = generateSEO({
+  title: 'Home',
+  description: 'Discover the best products at unbeatable prices. Free shipping on orders over PKR 2000. Shop electronics, fashion, home goods, and more with AI-powered recommendations.',
+  url: '/',
+})
 
 export default async function HomePage() {
   const [featuredProducts, newArrivals] = await Promise.all([
@@ -169,6 +177,14 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Structured Data for SEO */}
+      <Script id="organization-schema" type="application/ld+json">
+        {JSON.stringify(generateOrganizationSchema())}
+      </Script>
+      <Script id="website-search-schema" type="application/ld+json">
+        {JSON.stringify(generateWebsiteSearchSchema())}
+      </Script>
     </div>
   )
 }
