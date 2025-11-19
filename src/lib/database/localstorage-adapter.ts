@@ -465,13 +465,50 @@ export class LocalStorageAdapter implements IDatabase {
     if (!deleted) throw new Error('Product not found')
   }
 
+  async getProductById(id: string): Promise<Product | null> {
+    return this.getProduct(id)
+  }
+
+  async getFeaturedProducts(limit: number = 8): Promise<Product[]> {
+    const products = this.db.query<Product>('products', p => p.isFeatured && p.status === 'active')
+    return products.slice(0, limit)
+  }
+
+  async getNewArrivals(limit: number = 8): Promise<Product[]> {
+    const products = this.db.query<Product>('products', p => p.isNewArrival && p.status === 'active')
+    // Sort by creation date
+    products.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    return products.slice(0, limit)
+  }
+
+  async getRelatedProducts(productId: string, categoryId: string, limit: number = 4): Promise<Product[]> {
+    const products = this.db.query<Product>(
+      'products',
+      p => p.categoryId === categoryId && p.id !== productId && p.status === 'active'
+    )
+    return products.slice(0, limit)
+  }
+
   // Categories
   async getCategories(): Promise<Category[]> {
     return this.db.query<Category>('categories', c => c.isActive)
   }
 
+  async getRootCategories(): Promise<Category[]> {
+    return this.db.query<Category>('categories', c => c.isActive && !c.parentId)
+  }
+
   async getCategory(id: string): Promise<Category | null> {
     return this.db.getById<Category>('categories', id)
+  }
+
+  async getCategoryById(id: string): Promise<Category | null> {
+    return this.getCategory(id)
+  }
+
+  async getCategoryBySlug(slug: string): Promise<Category | null> {
+    const categories = this.db.query<Category>('categories', c => c.slug === slug)
+    return categories[0] || null
   }
 
   // Orders

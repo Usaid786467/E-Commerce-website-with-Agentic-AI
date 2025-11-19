@@ -1,73 +1,41 @@
-import { prisma } from '@/lib/prisma'
+import { getDatabase } from '@/lib/database'
 
 /**
  * Get all active categories with hierarchy
  */
 export async function getCategories() {
-  return prisma.category.findMany({
-    where: {
-      isActive: true,
-    },
-    include: {
-      parent: true,
-      children: {
-        where: { isActive: true },
-        orderBy: { sortOrder: 'asc' },
-      },
-    },
-    orderBy: { sortOrder: 'asc' },
-  })
+  const db = getDatabase()
+  return db.getCategories()
 }
 
 /**
  * Get root categories (no parent)
  */
 export async function getRootCategories() {
-  return prisma.category.findMany({
-    where: {
-      isActive: true,
-      parentId: null,
-    },
-    include: {
-      children: {
-        where: { isActive: true },
-        orderBy: { sortOrder: 'asc' },
-      },
-    },
-    orderBy: { sortOrder: 'asc' },
-  })
+  const db = getDatabase()
+  return db.getRootCategories()
 }
 
 /**
  * Get category by slug with full hierarchy
  */
 export async function getCategoryBySlug(slug: string) {
-  return prisma.category.findUnique({
-    where: { slug },
-    include: {
-      parent: true,
-      children: {
-        where: { isActive: true },
-        orderBy: { sortOrder: 'asc' },
-      },
-    },
-  })
+  const db = getDatabase()
+  return db.getCategoryBySlug(slug)
 }
 
 /**
  * Get category breadcrumbs
  */
 export async function getCategoryBreadcrumbs(categoryId: string) {
+  const db = getDatabase()
   const breadcrumbs: Array<{
     id: string
     name: string
     slug: string
   }> = []
 
-  let currentCategory = await prisma.category.findUnique({
-    where: { id: categoryId },
-    include: { parent: true },
-  })
+  let currentCategory = await db.getCategoryById(categoryId)
 
   while (currentCategory) {
     breadcrumbs.unshift({
@@ -77,10 +45,7 @@ export async function getCategoryBreadcrumbs(categoryId: string) {
     })
 
     if (currentCategory.parentId) {
-      currentCategory = await prisma.category.findUnique({
-        where: { id: currentCategory.parentId },
-        include: { parent: true },
-      })
+      currentCategory = await db.getCategoryById(currentCategory.parentId)
     } else {
       break
     }

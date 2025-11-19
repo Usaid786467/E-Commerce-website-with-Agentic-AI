@@ -76,14 +76,21 @@ export interface IDatabase {
   // Products
   getProducts(params: any): Promise<{ products: Product[]; total: number }>
   getProduct(id: string): Promise<Product | null>
+  getProductById(id: string): Promise<Product | null>
   getProductBySlug(slug: string): Promise<Product | null>
+  getFeaturedProducts(limit?: number): Promise<Product[]>
+  getNewArrivals(limit?: number): Promise<Product[]>
+  getRelatedProducts(productId: string, categoryId: string, limit?: number): Promise<Product[]>
   createProduct(data: Partial<Product>): Promise<Product>
   updateProduct(id: string, data: Partial<Product>): Promise<Product>
   deleteProduct(id: string): Promise<void>
 
   // Categories
   getCategories(): Promise<Category[]>
+  getRootCategories(): Promise<Category[]>
   getCategory(id: string): Promise<Category | null>
+  getCategoryById(id: string): Promise<Category | null>
+  getCategoryBySlug(slug: string): Promise<Category | null>
 
   // Orders
   getOrders(params: any): Promise<{ orders: Order[]; total: number }>
