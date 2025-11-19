@@ -257,7 +257,7 @@ Keep responses under 150 words.
     return response.text()
   } catch (error) {
     console.error('Error getting chatbot response:', error)
-    return 'I apologize, but I'm having trouble processing your request right now. Please try again or contact our support team.'
+    return "I apologize, but I'm having trouble processing your request right now. Please try again or contact our support team."
   }
 }
 

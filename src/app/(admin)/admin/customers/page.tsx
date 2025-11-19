@@ -76,9 +76,10 @@ async function getCustomers(searchParams: any) {
 export default async function CustomersManagementPage({
   searchParams,
 }: {
-  searchParams: any
+  searchParams: Promise<any>
 }) {
-  const { customers, total, page, totalPages } = await getCustomers(searchParams)
+  const params = await searchParams
+  const { customers, total, page, totalPages } = await getCustomers(params)
 
   return (
     <div className="space-y-6">

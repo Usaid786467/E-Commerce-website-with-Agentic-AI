@@ -58,9 +58,10 @@ async function getOrders(searchParams: any) {
 export default async function OrdersManagementPage({
   searchParams,
 }: {
-  searchParams: any
+  searchParams: Promise<any>
 }) {
-  const { orders, total, page, totalPages } = await getOrders(searchParams)
+  const params = await searchParams
+  const { orders, total, page, totalPages } = await getOrders(params)
 
   const getStatusBadge = (status: string) => {
     const variants: any = {

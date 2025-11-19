@@ -56,9 +56,10 @@ async function getProducts(searchParams: any) {
 export default async function ProductsManagementPage({
   searchParams,
 }: {
-  searchParams: any
+  searchParams: Promise<any>
 }) {
-  const { products, total, page, totalPages } = await getProducts(searchParams)
+  const params = await searchParams
+  const { products, total, page, totalPages } = await getProducts(params)
 
   const getStockBadge = (stock: number) => {
     if (stock === 0) {

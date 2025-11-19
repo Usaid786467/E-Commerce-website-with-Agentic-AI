@@ -6,7 +6,7 @@ import { ProductSort } from '@/components/product/ProductSort'
 import { Pagination } from '@/components/ui/pagination'
 
 interface ProductsPageProps {
-  searchParams: {
+  searchParams: Promise<{
     search?: string
     categoryId?: string
     minPrice?: string
@@ -15,7 +15,7 @@ interface ProductsPageProps {
     rating?: string
     sortBy?: string
     page?: string
-  }
+  }>
 }
 
 export const metadata = {
@@ -26,22 +26,23 @@ export const metadata = {
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
-  const page = searchParams.page ? parseInt(searchParams.page) : 1
+  const params = await searchParams
+  const page = params.page ? parseInt(params.page) : 1
   const limit = 20
 
   const [productsData, categories] = await Promise.all([
     getProducts({
-      search: searchParams.search,
-      categoryId: searchParams.categoryId,
-      minPrice: searchParams.minPrice
-        ? parseFloat(searchParams.minPrice)
+      search: params.search,
+      categoryId: params.categoryId,
+      minPrice: params.minPrice
+        ? parseFloat(params.minPrice)
         : undefined,
-      maxPrice: searchParams.maxPrice
-        ? parseFloat(searchParams.maxPrice)
+      maxPrice: params.maxPrice
+        ? parseFloat(params.maxPrice)
         : undefined,
-      brand: searchParams.brand?.split(','),
-      rating: searchParams.rating ? parseInt(searchParams.rating) : undefined,
-      sortBy: searchParams.sortBy as any,
+      brand: params.brand?.split(','),
+      rating: params.rating ? parseInt(params.rating) : undefined,
+      sortBy: params.sortBy as any,
       page,
       limit,
     }),
@@ -62,8 +63,8 @@ export default async function ProductsPage({
       {/* Page Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold font-heading mb-2">
-          {searchParams.search
-            ? `Search Results for "${searchParams.search}"`
+          {params.search
+            ? `Search Results for "${params.search}"`
             : 'All Products'}
         </h1>
         <p className="text-muted-foreground">
@@ -79,11 +80,11 @@ export default async function ProductsPage({
             categories={categories as any}
             brands={brands}
             selectedFilters={{
-              categoryId: searchParams.categoryId,
-              minPrice: searchParams.minPrice,
-              maxPrice: searchParams.maxPrice,
-              brand: searchParams.brand?.split(','),
-              rating: searchParams.rating,
+              categoryId: params.categoryId,
+              minPrice: params.minPrice,
+              maxPrice: params.maxPrice,
+              brand: params.brand?.split(','),
+              rating: params.rating,
             }}
           />
         </aside>
@@ -95,7 +96,7 @@ export default async function ProductsPage({
             <div className="text-sm text-muted-foreground">
               Page {page} of {productsData.totalPages}
             </div>
-            <ProductSort currentSort={searchParams.sortBy} />
+            <ProductSort currentSort={params.sortBy} />
           </div>
 
           {/* Products */}
@@ -110,7 +111,7 @@ export default async function ProductsPage({
                     currentPage={page}
                     totalPages={productsData.totalPages}
                     baseUrl="/products"
-                    searchParams={searchParams}
+                    searchParams={params}
                   />
                 </div>
               )}
